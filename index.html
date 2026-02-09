@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+
+<img src="logo.png" alt="Baesics Logo" class="logo">
+
+<title>Probador de Talles Baesics</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body {
+  font-family: 'Montserrat', sans-serif;
+  background-color: #ffffff;
+  color: #111;
+  text-align: center;
+  padding: 20px;
+}
+
+
+h1 {
+  margin-bottom: 30px;
+}
+
+select, input, button {
+  padding: 10px;
+  margin: 10px;
+  border-radius: 8px;
+  border: none;
+  font-size: 16px;
+}
+
+.container {
+  max-width: 500px;
+  margin: auto;
+  background: white;
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+.logo {
+  width: 140px;
+  margin-bottom: 20px;
+}
+
+h1 {
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+button {
+  background-color: black;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  transition: 0.3s;
+}
+
+button:hover {
+  opacity: 0.8;
+}
+
+input, select {
+  border-radius: 10px;
+  border: 1px solid #ddd;
+}
+
+
+.resultado {
+  margin-top: 25px;
+  font-size: 22px;
+  font-weight: bold;
+}
+</style>
+</head>
+
+<body>
+
+ <div class="container">
+
+<h1>Probador de Talles Baesics</h1>
+
+<!-- PRENDA -->
+<select id="prenda">
+  <!-- MODELO A -->
+  <option value="compression">Compression Tee</option>
+  <option value="compression">Compression Tank</option>
+  <option value="compression">Compression Quarter-Zip</option>
+  <option value="compression">Compression Long Sleeve</option>
+
+  <!-- MODELO B -->
+  <option value="boxy">Boxy Mesh</option>
+  <option value="boxy">Boxy Algodón</option>
+  <option value="boxy">Boxy Long Sleeve</option>
+  <option value="hoodie">Hoodie Liviano</option>
+  <option value="hoodie">Hoodie</option>
+  <option value="trackvneck">Track V-Neck</option>
+  <option value="trackquarter">Track Quarter-Zip</option>
+
+  <!-- MODELO C -->
+  <option value="trackpants">Track Pants</option>
+  <option value="bottom">Joggers</option>
+  <option value="bottom">Track Short</option>
+  <option value="bottom">Mesh Short</option>
+
+  <!-- MODELO D -->
+  <option value="aesthetic">Morley Tank</option>
+  <option value="aesthetic">Stringer</option>
+</select>
+
+<br>
+
+<input type="number" id="altura" placeholder="Altura en cm">
+<input type="number" id="peso" placeholder="Peso en kg">
+
+<br>
+
+<select id="fit">
+  <option value="base">Fit Ajustado / Regular</option>
+  <option value="plus">Más Holgado / Oversize</option>
+</select>
+
+<br>
+
+<button onclick="calcularTalle()">Calcular Talle</button>
+
+<div class="resultado" id="resultado"></div>
+
+<div>
+<script>
+
+// -------------------------
+// 1️⃣ SISTEMA JERÁRQUICO
+// -------------------------
+
+function calcularNivelAltura(altura) {
+  if (altura < 170) return 1;
+  if (altura < 180) return 2;
+  if (altura < 185) return 3;
+  return 4;
+}
+
+function calcularNivelPeso(peso) {
+  if (peso < 65) return 1;
+  if (peso < 75) return 2;
+  if (peso < 85) return 3;
+  return 4;
+}
+
+// -------------------------
+// 2️⃣ CONVERSIONES
+// -------------------------
+
+function nivelALetra(nivel) {
+  const mapa = {1:"S", 2:"M", 3:"L", 4:"XL"};
+  return mapa[nivel];
+}
+
+// -------------------------
+// 3️⃣ MOTOR PRINCIPAL
+// -------------------------
+
+function calcularTalle() {
+
+  const prenda = document.getElementById("prenda").value;
+  const altura = Number(document.getElementById("altura").value);
+  const peso = Number(document.getElementById("peso").value);
+  const fit = document.getElementById("fit").value;
+  const resultado = document.getElementById("resultado");
+
+  if (isNaN(altura) || isNaN(peso) || altura <= 0 || peso <= 0) {
+    resultado.innerText = "Ingresá altura y peso válidos.";
+    return;
+  }
+
+  const nivelAltura = calcularNivelAltura(altura);
+  const nivelPeso = calcularNivelPeso(peso);
+
+  let diferencia = nivelPeso - nivelAltura;
+  let ajuste = 0;
+
+  if (diferencia >= 3) ajuste = 2;
+  else if (diferencia === 2) ajuste = 1;
+  else if (diferencia === 1) ajuste = 1;
+  else if (diferencia === -2) ajuste = -1;
+  else if (diferencia <= -3) ajuste = -2;
+
+  let nivelFinal = nivelAltura + ajuste;
+
+  if (nivelFinal < 1) nivelFinal = 1;
+  if (nivelFinal > 4) nivelFinal = 4;
+
+  // Ajuste por fit
+  if (fit === "plus" && nivelFinal < 4) {
+    nivelFinal += 1;
+  }
+
+  // Modelo A (talles 1-4)
+  if (prenda === "compression") {
+    resultado.innerText = "Tu talle ideal es: " + nivelFinal;
+    return;
+  }
+
+  const prendasSinS = ["hoodie", "trackvneck", "trackquarter", "trackpants"];
+
+  if (prendasSinS.includes(prenda) && nivelFinal === 1) {
+    nivelFinal = 2;
+  }
+
+  const mapa = {1:"S", 2:"M", 3:"L", 4:"XL"};
+  resultado.innerText = "Tu talle ideal es: " + mapa[nivelFinal];
+}
+
+
+
+
+</script>
+
+</body>
+</html>
+
+
